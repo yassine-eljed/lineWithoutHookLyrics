@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enchanted Lyrics Card</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Poppins:wght@300;500&display=swap');
+        
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #ff8e8e;
+        }
+
+        .card {
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            background: linear-gradient(45deg, rgba(255,107,107,0.1), rgba(255,255,255,0.2));
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15),
+                        inset 0 4px 16px rgba(255,255,255,0.2);
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 2px;
+            background: linear-gradient(45deg, #ff6b6b55, #ff8e8e55);
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(1deg); }
+            50% { transform: translateY(-20px) rotate(-1deg); }
+        }
+
+        .heart {
+            animation: heartbeat 1.2s infinite, glow 2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            20% { transform: scale(1.3); }
+            40% { transform: scale(1); }
+            60% { transform: scale(1.2); }
+            80% { transform: scale(1); }
+        }
+
+        @keyframes glow { 
+            0%, 100% { filter: drop-shadow(0 0 8px var(--primary)); }
+            50% { filter: drop-shadow(0 0 16px var(--secondary)); }
+        }
+
+        .roaming-heart {
+            position: fixed;
+            animation: moveHeart 3s ease-in-out forwards;
+            opacity: 0.3;
+            z-index: -1;
+            font-size: 8rem;
+        }
+
+        @keyframes moveHeart {
+            0% {
+                transform: translate(0, 0) scale(0.5);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translate(calc(100vw * var(--tx)), calc(100vh * var(--ty))) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 flex items-center justify-center overflow-hidden">
+    
+    <div class="card p-8 max-w-2xl w-full mx-4 relative">
+        <div id="lyrics-container" class="text-2xl font-['Playfair Display'] text-gray-700 space-y-4 relative z-10 leading-relaxed text-glow"></div>
+        <div id="heart-container" class="text-center mt-8 text-5xl hidden"></div>
+    </div>
+
+    <script>
+        const lyrics = [
+            "Cause there is something, and there is nothing",
+            "There is nothing in between",
+            "And in my eyes, there is a tiny dancer",
+            "Watching over me, he's singing",
+            "\"She's a, she's a lady, and I am just a boy\"",
+            "He's singing, \"She's a, she's a lady, and I am just a line without a hook\"",
+        ];
+
+        const container = document.getElementById('lyrics-container');
+        const heartContainer = document.getElementById('heart-container');
+        let currentLine = 0;
+
+        function createRoamingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'roaming-heart text-rose-400';
+            heart.innerHTML = '❤️';
+            
+            // Random starting position
+            const startX = Math.random(); 
+            const startY = Math.random();
+            
+            // Random movement direction
+            const tx = Math.random() * 2 - 1;
+            const ty = Math.random() * 2 - 1;
+            
+            heart.style.setProperty('--tx', tx);
+            heart.style.setProperty('--ty', ty);
+            heart.style.left = `${startX * 100}%`;
+            heart.style.top = `${startY * 100}%`;
+            
+            document.body.appendChild(heart);
+            
+            // Remove element after animation
+            setTimeout(() => heart.remove(), 3000);
+        }
+
+        // Initial music delay with loading effect
+        setTimeout(() => {
+            startTyping();
+            document.querySelector('.card').style.transform = 'scale(1)';
+            
+            // Start roaming hearts
+            setInterval(createRoamingHeart, 800);
+        }, 2000);
+
+        function startTyping() {
+            // Decreased the total typing time to make it faster
+            const totalTypingTime = 25000; // Changed from 49000 to 25000
+            const totalChars = lyrics.reduce((acc, line) => acc + line.length, 0);
+            const charDelay = totalTypingTime / totalChars;
+
+            function typeNextLine() {
+                if (currentLine >= lyrics.length) {
+                    setTimeout(() => {
+                        heartContainer.classList.remove('hidden');
+                        heartContainer.innerHTML = `
+                            <div class="heart text-rose-600">
+                                <3
+                                <div class="absolute inset-0 bg-pink-100 rounded-full animate-ping"></div>
+                            </div>`;
+                    }, 3000);
+                    return;
+                }
+
+                const line = lyrics[currentLine];
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'fade-in';
+                container.appendChild(lineDiv);
+                
+                let charIndex = 0;
+                
+                function typeNextChar() {
+                    if (charIndex < line.length) {
+                        lineDiv.textContent = line.substring(0, charIndex + 1);
+                        charIndex++;
+                        setTimeout(typeNextChar, charDelay);
+                    } else {
+                        currentLine++;
+                        setTimeout(typeNextLine, 300); // Reduced pause between lines from 500 to 300
+                    }
+                }
+
+                typeNextChar()
+            }
+
+            typeNextLine();
+        }
+    </script>
+</body>
+</html>
